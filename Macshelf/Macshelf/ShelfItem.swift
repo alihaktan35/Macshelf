@@ -17,23 +17,16 @@ struct ShelfItem: Identifiable {
         case text(String)   // plain-text snippet
     }
 
-    // MARK: Drag-out provider
+    // MARK: Drag-out
 
-    /// Builds an NSItemProvider suitable for dragging this item
-    /// onto Finder, Mail, a text editor, or any drop target.
-    var dragProvider: NSItemProvider {
+    /// Returns an NSPasteboardWriting-conforming object for NSDraggingItem.
+    /// NSURL and NSString both conform directly; NSItemProvider does not in
+    /// the macOS 26 SDK and cannot be used with NSDraggingItem.
+    var pasteboardWriter: any NSPasteboardWriting {
         switch kind {
-        case .file(let url):
-            // `contentsOf:` creates a file-backed provider; fall back to a URL
-            // provider if the file is inaccessible (e.g. sandbox revocation).
-            return NSItemProvider(contentsOf: url)
-                ?? NSItemProvider(object: url as NSURL)
-
-        case .webURL(let url):
-            return NSItemProvider(object: url as NSURL)
-
-        case .text(let string):
-            return NSItemProvider(object: string as NSString)
+        case .file(let url):    return url as NSURL
+        case .webURL(let url):  return url as NSURL
+        case .text(let string): return string as NSString
         }
     }
 }

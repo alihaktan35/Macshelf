@@ -128,7 +128,7 @@ final class ItemDragView: NSView, NSDraggingSource {
     }
 
     private func startDrag(event: NSEvent) {
-        let di = NSDraggingItem(pasteboardWriter: item.dragProvider)
+        let di = NSDraggingItem(pasteboardWriter: item.pasteboardWriter)
         let sz = CGSize(width: 48, height: 48)
         di.setDraggingFrame(
             NSRect(x: (bounds.width - sz.width) / 2,
