@@ -30,10 +30,7 @@ It is a free, open-source alternative to [Yoink](https://eternalstorms.at/yoink/
 
 ## 📹 Demo
 
-<!-- Replace the placeholder below with your actual demo video once available.     -->
-<!-- Upload an .mp4 directly to a GitHub Issue, copy the URL, and paste it below.  -->
-
-> 🎬 Demo video coming soon.
+<img src="https://i.hizliresim.com/3ruqafp.gif" width="540" />
 
 ---
 
