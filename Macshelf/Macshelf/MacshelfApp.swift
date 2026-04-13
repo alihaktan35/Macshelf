@@ -1,17 +1,11 @@
-//
-//  MacshelfApp.swift
-//  Macshelf
-//
-//  Created by Ali Haktan Sığın on 13.04.2026.
-//
-
 import SwiftUI
 
 @main
 struct MacshelfApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
     var body: some Scene {
-        WindowGroup {
-            ContentView()
-        }
+        // No window from SwiftUI — the floating NSPanel is managed by AppDelegate.
+        Settings { EmptyView() }
     }
 }
