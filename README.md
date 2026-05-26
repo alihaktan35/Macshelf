@@ -16,6 +16,10 @@ Drop files, links, and text while you work — drag them out whenever you need t
 
 [**Website →**](https://ahsdev.com.tr/macshelf/) · [**Download →**](#-download)
 
+<br/>
+
+<img src="https://i.hizliresim.com/8ouzgde.png" alt="Macshelf preview" width="640" />
+
 </div>
 
 ---
