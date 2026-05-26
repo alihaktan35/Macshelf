@@ -135,14 +135,19 @@ final class ItemDragView: NSView, NSDraggingSource {
     }
 
     private func startDrag(event: NSEvent) {
-        let di = NSDraggingItem(pasteboardWriter: item.pasteboardWriter)
         let sz = CGSize(width: 48, height: 48)
-        // Use bounds only when it has been laid out; fall back to a safe origin.
         let origin = bounds.isEmpty
             ? NSPoint(x: 8, y: 16)
             : NSPoint(x: (bounds.width - sz.width) / 2, y: (bounds.height - sz.height) / 2)
-        di.setDraggingFrame(NSRect(origin: origin, size: sz), contents: item.icon)
-        beginDraggingSession(with: [di], event: event, source: self)
+        let frame = NSRect(origin: origin, size: sz)
+        // Groups produce one NSDraggingItem per file so the destination receives all
+        // URLs in a single session — the user drags once, everything lands at once.
+        let draggingItems = zip(item.pasteboardWriters, item.dragIcons).map { writer, dragIcon -> NSDraggingItem in
+            let di = NSDraggingItem(pasteboardWriter: writer)
+            di.setDraggingFrame(frame, contents: dragIcon)
+            return di
+        }
+        beginDraggingSession(with: draggingItems, event: event, source: self)
     }
 
     // MARK: - NSDraggingSource
@@ -176,8 +181,12 @@ struct ItemVisual: View {
 
     @Environment(\.pixelLength) private var pixelLength
 
-    var body: some View {
-        VStack(spacing: 5) {
+    @ViewBuilder
+    private var iconView: some View {
+        switch item.kind {
+        case .group(_, let icons):
+            GroupIconStack(icons: icons, count: icons.count)
+        default:
             Image(nsImage: item.icon)
                 .resizable()
                 .interpolation(.high)
@@ -185,6 +194,12 @@ struct ItemVisual: View {
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 46, height: 46)
                 .shadow(color: .black.opacity(0.25), radius: 5, x: 0, y: 3)
+        }
+    }
+
+    var body: some View {
+        VStack(spacing: 5) {
+            iconView
 
             Text(item.displayName)
                 .font(.system(size: 9, weight: .medium, design: .rounded))
@@ -209,5 +224,51 @@ struct ItemVisual: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(item.displayName)
         .accessibilityHint("Drag to use, right-click to remove")
+    }
+}
+
+// MARK: - Group icon stack
+
+private struct GroupIconStack: View {
+    let icons: [NSImage]
+    let count: Int
+
+    var body: some View {
+        ZStack {
+            // Back icons rendered first so they sit behind the front icon.
+            if icons.count >= 3 {
+                leafIcon(icons[2], size: 28)
+                    .rotationEffect(.degrees(-12))
+                    .offset(x: -8, y: 5)
+                    .opacity(0.7)
+            }
+            if icons.count >= 2 {
+                leafIcon(icons[1], size: 32)
+                    .rotationEffect(.degrees(-6))
+                    .offset(x: -4, y: 2)
+                    .opacity(0.85)
+            }
+            if let first = icons.first {
+                leafIcon(first, size: 36)
+                    .shadow(color: .black.opacity(0.25), radius: 4, x: 0, y: 2)
+            }
+        }
+        .frame(width: 46, height: 46)
+        .overlay(alignment: .topTrailing) {
+            Text("\(count)")
+                .font(.system(size: 8, weight: .bold, design: .rounded))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 4)
+                .padding(.vertical, 2)
+                .background(Color.blue.opacity(0.85), in: Capsule())
+        }
+    }
+
+    private func leafIcon(_ image: NSImage, size: CGFloat) -> some View {
+        Image(nsImage: image)
+            .resizable()
+            .interpolation(.high)
+            .aspectRatio(contentMode: .fit)
+            .frame(width: size, height: size)
     }
 }

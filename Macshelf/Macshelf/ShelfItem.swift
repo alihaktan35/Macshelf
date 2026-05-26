@@ -12,26 +12,35 @@ struct ShelfItem: Identifiable {
     let displayName: String
 
     enum Kind {
-        case file(URL)       // local file or folder
-        case webURL(URL)     // link dragged from a browser
-        case text(String)    // plain-text snippet
-        case image(NSImage)  // raw image (e.g. dragged from Preview or Photos)
+        case file(URL)                // local file or folder
+        case webURL(URL)              // link dragged from a browser
+        case text(String)             // plain-text snippet
+        case image(NSImage)           // raw image (e.g. dragged from Preview or Photos)
+        case group([URL], [NSImage])  // multiple files dropped together; icons are pre-fetched
     }
 
     // MARK: Drag-out
 
-    /// Returns an NSPasteboardWriting-conforming object for NSDraggingItem.
-    /// NSURL and NSString both conform directly; NSItemProvider does not in
-    /// the macOS 26 SDK and cannot be used with NSDraggingItem.
-    var pasteboardWriter: any NSPasteboardWriting {
+    /// One writer per logical item — groups produce N writers so the destination
+    /// receives every URL in a single drag session without the user dragging twice.
+    var pasteboardWriters: [any NSPasteboardWriting] {
         switch kind {
-        case .file(let url):    return url as NSURL
-        case .webURL(let url):  return url as NSURL
-        case .text(let string): return string as NSString
-        case .image(let image):
-            let item = NSPasteboardItem()
-            if let tiff = image.tiffRepresentation { item.setData(tiff, forType: .tiff) }
-            return item
+        case .file(let url):          return [url as NSURL]
+        case .webURL(let url):        return [url as NSURL]
+        case .text(let string):       return [string as NSString]
+        case .image(let nsImage):
+            let pb = NSPasteboardItem()
+            if let tiff = nsImage.tiffRepresentation { pb.setData(tiff, forType: .tiff) }
+            return [pb]
+        case .group(let urls, _):     return urls.map { $0 as NSURL }
+        }
+    }
+
+    /// Drag images paired 1:1 with pasteboardWriters.
+    var dragIcons: [NSImage] {
+        switch kind {
+        case .group(_, let icons): return icons
+        default:                   return [icon]
         }
     }
 }

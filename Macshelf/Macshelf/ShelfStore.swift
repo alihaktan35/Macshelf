@@ -18,14 +18,20 @@ final class ShelfStore {
 
     func add(urls: [URL]) {
         withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
-            for url in urls {
+            if urls.count > 1 {
+                let icons: [NSImage] = urls.map { url in
+                    url.isFileURL
+                        ? NSWorkspace.shared.icon(forFile: url.path(percentEncoded: false))
+                        : NSImage(systemSymbolName: "link.circle.fill", accessibilityDescription: nil) ?? NSImage()
+                }
+                let label = urls.allSatisfy(\.isFileURL) ? "\(urls.count) Files" : "\(urls.count) Items"
+                items.append(ShelfItem(kind: .group(urls, icons), icon: icons[0], displayName: label))
+            } else if let url = urls.first {
                 if url.isFileURL {
                     let icon = NSWorkspace.shared.icon(forFile: url.path(percentEncoded: false))
-                    items.append(ShelfItem(kind: .file(url), icon: icon,
-                                          displayName: url.lastPathComponent))
+                    items.append(ShelfItem(kind: .file(url), icon: icon, displayName: url.lastPathComponent))
                 } else {
-                    let icon = NSImage(systemSymbolName: "link.circle.fill",
-                                      accessibilityDescription: nil) ?? NSImage()
+                    let icon = NSImage(systemSymbolName: "link.circle.fill", accessibilityDescription: nil) ?? NSImage()
                     let name = url.host(percentEncoded: false) ?? url.absoluteString
                     items.append(ShelfItem(kind: .webURL(url), icon: icon, displayName: name))
                 }
