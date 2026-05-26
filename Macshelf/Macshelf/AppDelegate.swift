@@ -130,8 +130,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 ctx.timingFunction = CAMediaTimingFunction(name: .easeIn)
                 self.panel?.animator().alphaValue = 0
             }, completionHandler: { [weak self] in
-                guard self?.store.items.isEmpty == true else { return }
-                self?.panel?.orderOut(nil)
+                MainActor.assumeIsolated {
+                    guard self?.store.items.isEmpty == true else { return }
+                    self?.panel?.orderOut(nil)
+                }
             })
         }
     }
