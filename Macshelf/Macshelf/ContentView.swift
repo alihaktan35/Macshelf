@@ -72,21 +72,30 @@ struct ContentView: View {
             .frame(height: 22)
             .contentShape(Rectangle())
 
-            // Quit button — single click shows a confirmation menu
-            Menu {
-                Button("Quit") {
-                    NSApp.terminate(nil)
+            // Quit button — pops a native NSMenu so styling matches the info button exactly.
+            // Uses QuitTarget's custom selector instead of terminate: so macOS 26 does not
+            // auto-assign a power icon to the menu item.
+            Button {
+                let menu = NSMenu()
+                let item = menu.addItem(
+                    withTitle: "Quit",
+                    action: #selector(QuitTarget.quit(_:)),
+                    keyEquivalent: ""
+                )
+                item.target = QuitTarget.shared
+                if let event = NSApp.currentEvent,
+                   let view = event.window?.contentView {
+                    NSMenu.popUpContextMenu(menu, with: event, for: view)
                 }
             } label: {
                 Image(systemName: "xmark.circle")
                     .font(.system(size: 11, weight: .light))
                     .foregroundStyle(.white.opacity(0.38))
             }
-            .menuStyle(.borderlessButton)
-            .menuIndicator(.hidden)
-            .foregroundStyle(.white.opacity(0.38))
+            .buttonStyle(.plain)
             .frame(width: buttonColumnWidth, height: 22)
             .offset(x: -4)
+            .contentShape(Rectangle())
             .accessibilityLabel("Quit Macshelf")
         }
         .frame(maxWidth: .infinity)
@@ -232,6 +241,13 @@ struct ContentView: View {
 /// Transparent NSView that initiates window movement when the user
 /// left-clicks and drags. Placed only in the grip bar's center column
 /// so the info button and item rows are never accidentally moved.
+// Thin ObjC target for the quit menu item. Using a custom selector instead of
+// NSApplication.terminate(_:) prevents macOS 26 from auto-assigning a power icon.
+private final class QuitTarget: NSObject {
+    static let shared = QuitTarget()
+    @objc func quit(_ sender: Any?) { NSApp.terminate(nil) }
+}
+
 private struct WindowDragger: NSViewRepresentable {
     func makeNSView(context: Context) -> _View { _View() }
     func updateNSView(_ nsView: _View, context: Context) {}
