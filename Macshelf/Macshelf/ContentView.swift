@@ -35,21 +35,30 @@ struct ContentView: View {
     // MARK: - Grip bar
     //
     // Three-column HStack:
-    //   Left  — transparent spacer (mirrors button width for visual centering)
+    //   Left  — info (i) button
     //   Center — grip capsule + WindowDragger (drag-to-move the panel)
-    //   Right  — info button
+    //   Right  — quit (x) button
     //
     // WindowDragger is scoped to the center column only, so it never
-    // intercepts the info button's click area.
+    // intercepts either button's click area.
 
     private let buttonColumnWidth: CGFloat = 22
 
     private var gripBar: some View {
         HStack(spacing: 0) {
-            // Mirror spacer — slightly narrower than the button column so the
-            // grip stays roughly centered while the button sits away from the corner.
-            Color.clear
-                .frame(width: buttonColumnWidth - 4, height: 28)
+            // Info button
+            Button {
+                AboutWindowController.shared.show()
+            } label: {
+                Image(systemName: "info.circle")
+                    .font(.system(size: 11, weight: .light))
+                    .foregroundStyle(.white.opacity(0.38))
+            }
+            .buttonStyle(.plain)
+            .frame(width: buttonColumnWidth, height: 22)
+            .offset(x: 4)
+            .contentShape(Rectangle())
+            .accessibilityLabel("About Macshelf")
 
             // Center: drag handle
             ZStack {
@@ -60,30 +69,29 @@ struct ContentView: View {
                 WindowDragger()
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 28)
+            .frame(height: 22)
             .contentShape(Rectangle())
-            .contextMenu {
-                Button("Quit MacShelf", role: .destructive) {
+
+            // Quit button — single click shows a confirmation menu
+            Menu {
+                Button("Quit") {
                     NSApp.terminate(nil)
                 }
-            }
-
-            // Info button
-            Button {
-                AboutWindowController.shared.show()
             } label: {
-                Image(systemName: "info.circle")
+                Image(systemName: "xmark.circle")
                     .font(.system(size: 11, weight: .light))
                     .foregroundStyle(.white.opacity(0.38))
             }
-            .buttonStyle(.plain)
-            .frame(width: buttonColumnWidth, height: 28)
-            .offset(x: -4)   // pull away from the rounded corner
-            .contentShape(Rectangle())
-            .accessibilityLabel("About Macshelf")
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .foregroundStyle(.white.opacity(0.38))
+            .frame(width: buttonColumnWidth, height: 22)
+            .offset(x: -4)
+            .accessibilityLabel("Quit Macshelf")
         }
         .frame(maxWidth: .infinity)
-        .frame(height: 28)
+        .padding(.top, 5)
+        .frame(height: 27)
     }
 
     // MARK: - Empty state

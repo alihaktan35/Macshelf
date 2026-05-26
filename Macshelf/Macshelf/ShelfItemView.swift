@@ -207,10 +207,27 @@ struct ItemVisual: View {
                 .lineLimit(2)
                 .multilineTextAlignment(.center)
                 .truncationMode(.middle)
+                .opacity(isHovering ? 0 : 1)
         }
         .padding(.vertical, 7)
         .padding(.horizontal, 5)
         .frame(maxWidth: .infinity)
+        .overlay(alignment: .bottom) {
+            if isHovering {
+                Text(item.displayName)
+                    .font(.system(size: 9, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(4)
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 4)
+                    .frame(maxWidth: .infinity)
+                    .background(.black.opacity(0.55), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    .padding(3)
+                    .transition(.opacity.combined(with: .scale(scale: 0.97, anchor: .bottom)))
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
         .background(
             RoundedRectangle(cornerRadius: 13, style: .continuous)
                 .fill(isHovering ? .white.opacity(0.14) : .white.opacity(0.07))
