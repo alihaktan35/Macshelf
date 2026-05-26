@@ -18,7 +18,7 @@ Drop files, links, and text while you work — drag them out whenever you need t
 
 <br/>
 
-<img src="https://i.hizliresim.com/8ouzgde.png" alt="Macshelf preview" width="640" />
+<img src="https://i.hizliresim.com/n9x5vxg.png" alt="Macshelf preview" width="100%" />
 
 </div>
 
