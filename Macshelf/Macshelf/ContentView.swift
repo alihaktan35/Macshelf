@@ -80,6 +80,7 @@ struct ContentView: View {
             .frame(width: buttonColumnWidth, height: 28)
             .offset(x: -4)   // pull away from the rounded corner
             .contentShape(Rectangle())
+            .accessibilityLabel("About Macshelf")
         }
         .frame(maxWidth: .infinity)
         .frame(height: 28)
@@ -146,6 +147,7 @@ struct ContentView: View {
             .background(.white.opacity(0.05))
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("Clear all items")
     }
 
     // MARK: - Liquid Glass layers

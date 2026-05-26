@@ -36,6 +36,6 @@ final class AboutWindowController: NSWindowController {
         window?.center()
         window?.makeKeyAndOrderFront(nil)
         window?.makeFirstResponder(nil)   // clear any lingering focus ring
-        NSApp.activate(ignoringOtherApps: true)
+        NSApp.activate()
     }
 }

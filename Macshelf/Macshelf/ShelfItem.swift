@@ -12,9 +12,10 @@ struct ShelfItem: Identifiable {
     let displayName: String
 
     enum Kind {
-        case file(URL)      // local file or folder
-        case webURL(URL)    // link dragged from a browser
-        case text(String)   // plain-text snippet
+        case file(URL)       // local file or folder
+        case webURL(URL)     // link dragged from a browser
+        case text(String)    // plain-text snippet
+        case image(NSImage)  // raw image (e.g. dragged from Preview or Photos)
     }
 
     // MARK: Drag-out
@@ -27,6 +28,10 @@ struct ShelfItem: Identifiable {
         case .file(let url):    return url as NSURL
         case .webURL(let url):  return url as NSURL
         case .text(let string): return string as NSString
+        case .image(let image):
+            let item = NSPasteboardItem()
+            if let tiff = image.tiffRepresentation { item.setData(tiff, forType: .tiff) }
+            return item
         }
     }
 }

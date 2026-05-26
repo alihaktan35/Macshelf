@@ -2,6 +2,7 @@ import Foundation
 import AppKit
 import SwiftUI
 
+@MainActor
 @Observable
 final class ShelfStore {
 
@@ -39,6 +40,12 @@ final class ShelfStore {
         withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
             items.append(ShelfItem(kind: .text(text), icon: icon,
                                    displayName: String(trimmed.prefix(48))))
+        }
+    }
+
+    func add(image: NSImage) {
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
+            items.append(ShelfItem(kind: .image(image), icon: image, displayName: "Image"))
         }
     }
 

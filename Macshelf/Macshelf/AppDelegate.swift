@@ -11,7 +11,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var globalMouseUpMonitor: Any?
 
     // Pending hide operation (cancelled if a new drag arrives before it fires).
-    private var pendingHide: DispatchWorkItem?
+    private var pendingHide: Task<Void, Never>?
 
     // Drag-content detection: only show the shelf when the drag pasteboard
     // carries real content (files, URLs, text) — not for window moves, resizes, etc.
@@ -80,13 +80,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         dropView.addSubview(host)
         panel.contentView = dropView
 
-        place(panel, size: CGSize(width: 88, height: 340))
+        if let screen = NSScreen.main { place(panel, on: screen, size: CGSize(width: 88, height: 340)) }
         // Do NOT call orderFrontRegardless here — panel starts invisible.
         self.panel = panel
     }
 
-    private func place(_ panel: NSPanel, size: CGSize) {
-        guard let screen = NSScreen.main else { return }
+    private func place(_ panel: NSPanel, on screen: NSScreen, size: CGSize) {
         let vis = screen.visibleFrame
         panel.setFrame(
             NSRect(
@@ -105,6 +104,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         pendingHide?.cancel()
         pendingHide = nil
         guard let panel else { return }
+        // Track cursor screen while fading in so the shelf always appears where the drag is.
+        if panel.alphaValue < 1 {
+            let cursor = NSEvent.mouseLocation
+            let screen = NSScreen.screens.first(where: { $0.frame.contains(cursor) }) ?? NSScreen.main
+            if let screen { place(panel, on: screen, size: CGSize(width: 88, height: 340)) }
+        }
         if !panel.isVisible { panel.orderFrontRegardless() }
         guard panel.alphaValue < 1 else { return }  // already fully visible — skip animation
         NSAnimationContext.runAnimationGroup { ctx in
@@ -116,8 +121,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func scheduleHide(delay: TimeInterval = 0.55) {
         guard store.items.isEmpty else { return }  // stay visible if items remain
-
-        let work = DispatchWorkItem { [weak self] in
+        pendingHide?.cancel()
+        pendingHide = Task { @MainActor [weak self] in
+            do { try await Task.sleep(for: .seconds(delay)) } catch { return }
             guard let self, self.store.items.isEmpty else { return }
             NSAnimationContext.runAnimationGroup({ ctx in
                 ctx.duration = 0.22
@@ -128,8 +134,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 self?.panel?.orderOut(nil)
             })
         }
-        pendingHide = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: work)
     }
 
     // MARK: - Global drag monitoring
@@ -212,7 +216,7 @@ final class DropReceivingView: NSView {
     init(store: ShelfStore) {
         self.store = store
         super.init(frame: .zero)
-        registerForDraggedTypes([.fileURL, .URL, .string])
+        registerForDraggedTypes([.fileURL, .URL, .string, .tiff, NSPasteboard.PasteboardType("public.png")])
     }
 
     required init?(coder: NSCoder) { fatalError() }
@@ -259,6 +263,14 @@ final class DropReceivingView: NSView {
         // 3. Plain text
         if let text = pb.string(forType: .string), !text.isEmpty {
             store.add(text: text)
+            return true
+        }
+
+        // 4. Raw image data (e.g. dragged from Preview, Photos, or a screenshot)
+        let pngType = NSPasteboard.PasteboardType("public.png")
+        if let data = pb.data(forType: .tiff) ?? pb.data(forType: pngType),
+           let image = NSImage(data: data) {
+            store.add(image: image)
             return true
         }
 

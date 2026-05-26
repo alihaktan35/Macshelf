@@ -206,5 +206,8 @@ struct ItemVisual: View {
         )
         .scaleEffect(isHovering ? 1.05 : 1)
         .animation(.spring(response: 0.22, dampingFraction: 0.65), value: isHovering)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(item.displayName)
+        .accessibilityHint("Drag to use, right-click to remove")
     }
 }
