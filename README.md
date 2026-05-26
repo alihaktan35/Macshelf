@@ -37,10 +37,12 @@ It is a free, open-source alternative to [Yoink](https://eternalstorms.at/yoink/
 ## ✨ Features
 
 - **Zero friction** — the shelf appears only when you drag a file, link, or text. Window moves and resizes never trigger it.
-- **Drop anything** — local files & folders, web URLs, plain text snippets. All treated as first-class items.
+- **Drop anything** — local files & folders, web URLs, plain-text snippets, and raw images (from Preview, Photos, or screenshots).
+- **Group drag-drop** — drop multiple files at once and they land as a single group. Drag the group out and every file goes to the destination in one move.
 - **Drag back out** — every item on the shelf is fully draggable. Drop it anywhere that accepts files or text.
 - **Auto-clean** — an item is removed from the shelf the moment its drop is accepted by the destination.
 - **Always on top** — floats above all windows, works across every Space and full-screen app.
+- **Multi-display aware** — the shelf appears on whichever screen you're dragging from.
 - **Liquid Glass UI** — designed from scratch for macOS 26 with frosted glass, smooth spring animations, and pixel-perfect Retina rendering.
 - **Featherweight** — no background agents, no persistent services. Near-zero CPU and memory when idle.
 
@@ -54,7 +56,7 @@ It is a free, open-source alternative to [Yoink](https://eternalstorms.at/yoink/
 2. Download `Macshelf.app` from the latest release.
 3. Drag **Macshelf.app** to your Applications folder, and launch it.
 
-> Macshelf is a menu-bar-less accessory app — it won't appear in your Dock or ⌘-Tab switcher. To quit, right-click the grip bar at the top of the shelf and choose **Quit MacShelf**.
+> Macshelf is a menu-bar-less accessory app — it won't appear in your Dock or ⌘-Tab switcher. To quit, click the **(×)** button in the grip bar and choose **Quit**.
 
 ---
 
@@ -86,7 +88,7 @@ Macshelf is open source and contributions are welcome.
 - **Bug reports & feature requests** → [open an issue](https://github.com/alihaktan35/Macshelf/issues)
 - **Pull requests** → fork the repo, make your changes on a branch, and open a PR against `main`
 
-The codebase is intentionally small — five Swift files, no third-party dependencies.
+The codebase is intentionally small — ~1000 lines across 8 Swift files, no third-party dependencies.
 
 ---
 
