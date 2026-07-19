@@ -34,7 +34,7 @@ It is a free, open-source alternative to [Yoink](https://eternalstorms.at/yoink/
 
 ## 📹 Demo
 
-<img src="https://i.hizliresim.com/3ruqafp.gif" width="540" />
+<img src="https://i.ibb.co/W447cVtL/Macshelf-Demo.gif" width="540" />
 
 ---
 
